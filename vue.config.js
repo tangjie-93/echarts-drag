@@ -1,0 +1,12 @@
+module.exports={
+    configureWebpack:{
+        output:{
+            library:"DragGridLayout",
+            libraryExport:'default'
+        }
+    },
+    devServer:{
+        port:8081,
+        open:true
+    }
+}
