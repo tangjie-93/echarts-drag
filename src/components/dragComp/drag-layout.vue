@@ -67,14 +67,15 @@ export default {
         }
     },
     created(){
-         console.log("layoutitem created")
+        //  console.log("layoutitem created")
          this.$emit("layout-created");
          this.updateHeight();
     },
     mounted(){
         validateLayout(this.layout);
         compact(this.layout);
-        correctBounds(this.layout,this.colNum);
+        correctBounds(this.layout,{cols:this.colNum});
+        console.dir(this.layout.slice(0));
         this.width=this.$refs["drag-container"]&&this.$refs["drag-container"].offsetWidth;
         this.$eventBus.$emit("dragLayout-mounted",this.width);
     },

@@ -58,10 +58,28 @@ export default {
             this.createStyle();
         })
         this.initData();
-        this.createStyle();
+        // this.createStyle();
     },
     mounted(){
-        console.log("item mounted")
+        // console.log("item mounted")
+    },
+    watch:{
+        x: function (newVal) {
+            this.itemX = newVal;
+            this.createStyle();
+        },
+        y: function (newVal) {
+            this.itemY = newVal;
+            this.createStyle();
+        },
+        h: function (newVal) {
+            this.itemH = newVal
+            this.createStyle();
+        },
+        w: function (newVal) {
+            this.itemW = newVal;
+            this.createStyle();
+        },
     },
     methods:{
         initData(){
@@ -135,5 +153,6 @@ export default {
 .drag-item{
     position: absolute;
     border: 1px solid gray;
+    transition: all 200ms ease;
 }
 </style>

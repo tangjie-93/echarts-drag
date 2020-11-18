@@ -1,6 +1,6 @@
 <template>
   <div class="content">
-      <drag-layout :layout="echartsData">
+      <drag-layout :layout.sync="echartsData">
         <drag-item v-for="item in echartsData" :key="item.i" :x='item.x' :y="item.y" :w="item.w" :h="item.h">
           {{item.i}}
             <!-- <render-chart :displayType="item.displayType" /> -->
@@ -33,7 +33,67 @@ export default {
          {
           i:2,
           x:0,y:0,
-          w:4,h:4
+          w:2,h:2
+        },
+         {
+          i:3,
+          x:0,y:0,
+          w:2,h:2
+        },
+         {
+          i:4,
+          x:0,y:0,
+          w:2,h:2
+        },
+        {
+          i:5,
+          x:0,y:0,
+          w:2,h:2
+        },
+         {
+          i:6,
+          x:0,y:0,
+          w:2,h:2
+        },
+         {
+          i:7,
+          x:0,y:0,
+          w:2,h:2
+        },
+         {
+          i:8,
+          x:0,y:0,
+          w:2,h:2
+        },
+         {
+          i:9,
+          x:0,y:0,
+          w:2,h:2
+        },
+         {
+          i:10,
+          x:0,y:0,
+          w:2,h:2
+        },
+        {
+          i:11,
+          x:0,y:0,
+          w:2,h:2
+        },
+         {
+          i:12,
+          x:0,y:0,
+          w:2,h:2
+        },
+         {
+          i:13,
+          x:0,y:0,
+          w:2,h:2
+        },
+         {
+          i:14,
+          x:0,y:0,
+          w:2,h:2
         }
       ]
     }
