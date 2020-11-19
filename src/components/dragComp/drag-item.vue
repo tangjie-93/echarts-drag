@@ -53,12 +53,12 @@ export default {
         }
     },
     created(){
-        this.$eventBus.$on("dragLayout-mounted",(width)=>{
+        this.$eventBus.$on("dragLayout-mounted",(width,colNum)=>{
             this.containerWidth=width;
+            this.colNum=colNum;
             this.createStyle();
         })
         this.initData();
-        // this.createStyle();
     },
     mounted(){
         // console.log("item mounted")
@@ -84,9 +84,7 @@ export default {
     methods:{
         initData(){
             const parent=this.$parent;
-            this.colNum=parent.colNum;
             this.rowHeight=parent.rowHeight;
-            this.containerWidth=parent.width||100;
             this.margin=parent.margin||[10,10];
             this.maxRows=parent.maxRows;
             this.draggable=parent.isDraggable||this.isDraggable;

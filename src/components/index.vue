@@ -102,8 +102,10 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-.centent{
+<style lang="scss" scoped>
+.content{
   width: 100%;
+  box-sizing: border-box;
+  padding: 30px;
 }
 </style>

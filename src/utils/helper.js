@@ -1,3 +1,5 @@
+import { Object } from "core-js";
+
 export function calcMaxRowByLayoutData(layout){
     const count=layout.length,max=Math.max;
     let maxRow=0;
@@ -74,28 +76,30 @@ function compactItem(compareWith,l,verticalCompact,horizontalCompact){
   }
   return l;
 }
-
-export function correctBounds(layout, bounds) {
-    const cols=bounds.cols
+/**
+ * 
+ * @param {Array} layout 
+ * @param {*} bounds 
+ */
+export function correctBounds(layout, colNum) {
     const overItemArr=[];//用于统计超出布局的元素
     for (let i = 0, len = layout.length; i < len; i++) {
       const l = layout[i];
       // Overflows right
-      if (l.x + l.w > cols) {
-		//使之一直靠右排布
-		console.log(l.i);
+      if (l.x + l.w > colNum) {
         overItemArr.push(l);
       }
       // Overflows left
       if (l.x < 0) {
         l.x = 0;
-        l.w = cols;
+        l.w = colNum;
       }
 	}
-	setLayoutForOverItems(cols,overItemArr,layout);
+	setLayoutForOverItems(colNum,overItemArr,layout);
+
     return layout;
   }
-  /**
+/**
  * Returns the first item this layout collides with.
  * It doesn't appear to matter which order we approach this from, although
  * perhaps that is the wrong thing to do.
@@ -103,11 +107,11 @@ export function correctBounds(layout, bounds) {
  * @param  {Object} layoutItem Layout item.
  * @return {Object|undefined}  A colliding layout item, or undefined.
  */
-  export function getFirstCollision(layout, layoutItem) {
-    for (let i = 0, len = layout.length; i < len; i++) {
-      if (collides(layout[i], layoutItem)) return layout[i];
-    }
+export function getFirstCollision(layout, layoutItem) {
+  for (let i = 0, len = layout.length; i < len; i++) {
+    if (collides(layout[i], layoutItem)) return layout[i];
   }
+}
 
   /**
  * Given two layoutitems, check if they collide.
@@ -122,12 +126,18 @@ export function collides(l1, l2) {
     if (l1.y >= l2.y + l2.h) return false; // l1 is below l2
     return true; // boxes overlap
 }
-export function setLayoutForOverItems(cols,overItemArr,layout){
+/**
+ * 给超出边界的item进行布局定位
+ * @param {Number} colNum 排的列数
+ * @param {Array} overItemArr 超出边界的item
+ * @param {Array} layout 所有的布局数据
+ */
+export function setLayoutForOverItems(colNum,overItemArr,layout){
 	if(!overItemArr.length) return [];
 	//已经布局的item个数
 	const count=layout.length-overItemArr.length;
 	//每一层布局多少个
-	const countPerLayer=Math.floor(cols/2);
+	const countPerLayer=Math.floor(colNum/2);
 	//布局了几层
 	let layers=Math.floor(count/countPerLayer);
 	//最后一层布局了几个
@@ -157,6 +167,23 @@ export function setLayoutForOverItems(cols,overItemArr,layout){
 		}
 		item=overItemArr.shift();
 	}
-
+}
+export function toType(obj){
+	const toString=Object.prototype.toString;
+	const type= typeof obj;
+	return /^(object|function)/.test(type) ?toString.call(obj).slice(8,-1).toLowerCase():type;
 
 }
+export function getOwnProperty(obj){
+	if(obj==null) return [];
+	return [
+		...Object.keys(obj),...Object.getOwnPropertySymbols(obj)
+	]
+}
+export function shallowCopy(){
+
+}
+export function deepCopy(){
+
+}
+

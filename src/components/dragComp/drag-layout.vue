@@ -6,6 +6,7 @@
 
 <script>
 import {calcMaxRowByLayoutData, compact, correctBounds, validateLayout} from "../../utils/helper"
+import { getBreakPointByWidth, getColNumByBreakPoint} from "../../utils/resizeUtil"
 export default {
     name:"drag-layout",
     props:{
@@ -51,10 +52,10 @@ export default {
                 }
             }
         },
-        cols:{
+        colNums:{
             type: Object,
             default: function(){
-                return{ lg: 12, md: 9, sm: 6, xs: 4, xxs: 2 }
+                return{ lg: 12, md:8, sm: 6, xs: 4, xxs: 2 }
             },
         }
     },
@@ -63,29 +64,62 @@ export default {
             width:NaN,
             styleObj:{
                 display:'block'
-            }
+            },
+            storedLayout:{},
+            intialLayout:this.layout
         }
     },
     created(){
         //  console.log("layoutitem created")
-         this.$emit("layout-created");
-         this.updateHeight();
+        this.$emit("layout-created");
+       
     },
     mounted(){
-        validateLayout(this.layout);
-        compact(this.layout);
-        correctBounds(this.layout,{cols:this.colNum});
-        console.dir(this.layout.slice(0));
-        this.width=this.$refs["drag-container"]&&this.$refs["drag-container"].offsetWidth;
-        this.$eventBus.$emit("dragLayout-mounted",this.width);
+        const {intialLayout,colNum}=this;
+        validateLayout(intialLayout);
+        compact(intialLayout);
+        correctBounds(intialLayout,colNum);
+       
+        this.$nextTick(()=>{
+            this.updateHeight();
+            this.updateWidth();
+            this.$eventBus.$emit("dragLayout-mounted",this.width,colNum);
+            this.storedLayout[colNum]=JSON.stringify(intialLayout);
+            window.addEventListener('resize',this.windowResizeHandler)
+        })
+    },
+    beforeDestroy(){
+        window.removeEventListener('resize',this.windowResizeHandler);
     },
     methods:{
         updateHeight(){
             this.styleObj.height=this.calcHeight();
         },
+        updateWidth(){
+            this.calcWidth();
+        },
+        calcWidth(){
+            if(this.$refs["drag-container"]){
+                 this.width=this.$refs["drag-container"].offsetWidth;
+            }
+        },
         calcHeight(){
             const maxRows=calcMaxRowByLayoutData(this.layout)
             return  maxRows*(this.rowHeight + this.margin[1]) + this.margin[1] + 'px';
+        },
+        windowResizeHandler(){
+            this.updateWidth();
+            const {breakPoints,colNums,intialLayout,width}=this;
+            const breakPoint=getBreakPointByWidth(breakPoints,width);
+            const colNum=getColNumByBreakPoint(breakPoint,colNums);
+            this.$eventBus.$emit("dragLayout-mounted",width,colNum);
+            if(this.storedLayout[colNum]){
+                this.intialLayout=JSON.parse(this.storedLayout[colNum])
+            }else{
+                compact(intialLayout);
+                correctBounds(intialLayout,colNum);
+                this.storedLayout[colNum]=JSON.stringify(intialLayout);
+            }  
         }
     }
 }
