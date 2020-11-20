@@ -5,8 +5,9 @@
 </template>
 
 <script>
-import {calcMaxRowByLayoutData, compact, correctBounds, validateLayout} from "../../utils/helper"
-import { getBreakPointByWidth, getColNumByBreakPoint} from "../../utils/resizeUtil"
+import {calcMaxRowByLayoutData, compact, correctBounds, validateLayout,debounce, throtle} from "../../utils/helper"
+import { getBreakPointByWidth, getColNumByBreakPoint} from "../../utils/resizeUtil";
+let that;
 export default {
     name:"drag-layout",
     props:{
@@ -65,6 +66,7 @@ export default {
             styleObj:{
                 display:'block'
             },
+            lastColNum:NaN,
             storedLayout:{},
             intialLayout:this.layout
         }
@@ -72,17 +74,22 @@ export default {
     created(){
         //  console.log("layoutitem created")
         this.$emit("layout-created");
-       
+        that=this;
     },
     mounted(){
-        const {intialLayout,colNum}=this;
-        validateLayout(intialLayout);
-        compact(intialLayout);
-        correctBounds(intialLayout,colNum);
        
         this.$nextTick(()=>{
+           
             this.updateHeight();
             this.updateWidth();
+            const {breakPoints,colNums,intialLayout,width,lastColNum}=this;
+            const breakPoint=getBreakPointByWidth(breakPoints,width);
+            const colNum=getColNumByBreakPoint(breakPoint,colNums);
+
+            validateLayout(intialLayout);
+            compact(intialLayout);
+            correctBounds(intialLayout,colNum,lastColNum);
+            this.lastColNum=colNum;
             this.$eventBus.$emit("dragLayout-mounted",this.width,colNum);
             this.storedLayout[colNum]=JSON.stringify(intialLayout);
             window.addEventListener('resize',this.windowResizeHandler)
@@ -107,20 +114,24 @@ export default {
             const maxRows=calcMaxRowByLayoutData(this.layout)
             return  maxRows*(this.rowHeight + this.margin[1]) + this.margin[1] + 'px';
         },
-        windowResizeHandler(){
-            this.updateWidth();
-            const {breakPoints,colNums,intialLayout,width}=this;
-            const breakPoint=getBreakPointByWidth(breakPoints,width);
-            const colNum=getColNumByBreakPoint(breakPoint,colNums);
-            this.$eventBus.$emit("dragLayout-mounted",width,colNum);
-            if(this.storedLayout[colNum]){
-                this.intialLayout=JSON.parse(this.storedLayout[colNum])
-            }else{
-                compact(intialLayout);
-                correctBounds(intialLayout,colNum);
-                this.storedLayout[colNum]=JSON.stringify(intialLayout);
-            }  
-        }
+        windowResizeHandler:debounce(()=>{
+            that.$nextTick(()=>{
+                that.updateWidth();
+                const {breakPoints,colNums,intialLayout,width,lastColNum}=that;
+                const breakPoint=getBreakPointByWidth(breakPoints,width);
+                const colNum=getColNumByBreakPoint(breakPoint,colNums);
+                that.$eventBus.$emit("dragLayout-mounted",width,colNum);
+                if(that.storedLayout[colNum]){
+                    that.intialLayout=JSON.parse(that.storedLayout[colNum])
+                }else{
+                    compact(intialLayout);
+                    correctBounds(intialLayout,colNum,lastColNum);
+                     this.lastColNum=colNum;
+                    that.storedLayout[colNum]=JSON.stringify(intialLayout);
+                }  
+            })
+           
+        })
     }
 }
 </script>

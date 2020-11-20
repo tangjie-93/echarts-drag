@@ -92,6 +92,7 @@ export default {
             this.useCssTransforms=parent.useCssTransforms;
         },
         createStyle(){
+            console.log(this.colNum);
             //设置item的宽
             if(this.x+this.w>this.colNum){
                 this.itemX=0;
