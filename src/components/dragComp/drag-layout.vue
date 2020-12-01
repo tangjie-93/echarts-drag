@@ -5,7 +5,8 @@
 </template>
 
 <script>
-import {calcMaxRowByLayoutData, compact, correctBounds, validateLayout,debounce, throtle} from "../../utils/helper"
+import {debounce, throtle, deepCopy} from "../../utils/helper"
+import {calcMaxRowByLayoutData, compact, correctBounds, validateLayout} from "../../utils/layouthelper"
 import { getBreakPointByWidth, getColNumByBreakPoint} from "../../utils/resizeUtil";
 let that;
 export default {
@@ -87,16 +88,19 @@ export default {
             const colNum=getColNumByBreakPoint(breakPoint,colNums);
 
             validateLayout(intialLayout);
-            compact(intialLayout);
-            correctBounds(intialLayout,colNum,lastColNum);
+            const layout=deepCopy(intialLayout);
+            compact(layout);
+            correctBounds(layout,colNum,lastColNum);
+            this.$emit('update:layout', layout);
             this.lastColNum=colNum;
             this.$eventBus.$emit("dragLayout-mounted",this.width,colNum);
-            this.storedLayout[colNum]=JSON.stringify(intialLayout);
+            this.storedLayout[colNum]=layout;
             window.addEventListener('resize',this.windowResizeHandler)
         })
     },
     beforeDestroy(){
         window.removeEventListener('resize',this.windowResizeHandler);
+        that=null;
     },
     methods:{
         updateHeight(){
@@ -114,24 +118,30 @@ export default {
             const maxRows=calcMaxRowByLayoutData(this.layout)
             return  maxRows*(this.rowHeight + this.margin[1]) + this.margin[1] + 'px';
         },
-        windowResizeHandler:debounce(()=>{
+        windowResizeHandler:()=>{
             that.$nextTick(()=>{
                 that.updateWidth();
                 const {breakPoints,colNums,intialLayout,width,lastColNum}=that;
                 const breakPoint=getBreakPointByWidth(breakPoints,width);
                 const colNum=getColNumByBreakPoint(breakPoint,colNums);
                 that.$eventBus.$emit("dragLayout-mounted",width,colNum);
+                console.log(width);
                 if(that.storedLayout[colNum]){
-                    that.intialLayout=JSON.parse(that.storedLayout[colNum])
+                    const layout=that.storedLayout[colNum];
+                    //更新布局
+                    that.$emit('update:layout',  layout);
+                    that.lastColNum=colNum;
                 }else{
-                    compact(intialLayout);
-                    correctBounds(intialLayout,colNum,lastColNum);
-                     this.lastColNum=colNum;
-                    that.storedLayout[colNum]=JSON.stringify(intialLayout);
+                    const layout=deepCopy(intialLayout);
+                    compact(layout);
+                    correctBounds(layout,colNum,lastColNum);
+                    that.$emit('update:layout', layout);
+                    that.lastColNum=colNum;
+                    that.storedLayout[colNum]=layout;
                 }  
             })
            
-        })
+        }
     }
 }
 </script>
